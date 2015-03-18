@@ -27,11 +27,19 @@ We will be conducting four experiments with each participant.
 
 #### Sythetic User Interface ($ s $)
 
+This experiment will measure the user's accuracy and execution time when presented with a sequence of selection tasks.
+
 #### Wikipedia Navigation and Information Extraction ($ w $)
+
+This experiment will measure the difference in task execution time between different modes of input on a simple website.
 
 #### Amazon.com Navigation and Information Extraction ($ a $)
 
+This experiment will measure the difference in task execution time between different modes of input on a complex and dense website.
+
 #### User Focus ($ f $)
+
+This experiment will measure the amount of information gather and retained by the user with and without UI assistance from EyeJS.
 
 ### Participant Randomization
 
@@ -66,8 +74,8 @@ We don't want to evaluate the design or usability of the webpages used during th
 ### Secondary Question
 
 - How large should the gaze area (gaze indicator) be?
-- Does a visible gaze indicator increase or decrease user speed and/or accuracy?
-- Does automatic page scrolling decrease the amount of time it takes for users to perform the tasks?
+- Does a visible gaze indicator increase or decrease user speed and/or accuracy? **[I think this can go away.]**
+- Does automatic page scrolling decrease the amount of time it takes for users to perform the tasks? **[Should we add an experiment for automatic page scrolling?]**
 
 
 
@@ -75,19 +83,21 @@ We don't want to evaluate the design or usability of the webpages used during th
 
 ### Gaze Area
 
+The gaze area is a circular area where DOM sample points are taken by EyeJS. The samples are taken in an outward, counter-clockwise radiating fashion.
+
 ![](images/gaze-area.svg)
 
 ### Fixation Time
 
-We consider a *fixation* to have occurred after the longest possible saccade (in duration). So, if the user's gaze remains over a specific element for a greater period of time than the longest saccade, then we consider this a fixation of that element. Eye tracker samples which indicate the user's gaze is over a specific element, but do not sample that same element for longer than some fixation threshold should be ignored.
+We consider a *fixation* to have occurred after the longest possible saccade (in duration). So, if the user's gaze remains over a specific element for a greater period of time than the longest saccade, then we consider this a fixation of that element. Eye tracker samples which indicate the user's gaze is over a specific element, but do not sample that same element for longer than some fixation threshold are ignored.
 
 ![](images/saccade-ignore.svg)
 
-We define as fixation threshold as $\delta$ as the minimum amount of time the user's gaze must be continually over an element for a *fixation* to occur.
+We define the *fixation threshold*, $\delta$, as minimum amount of time the user's gaze must be continually over an element for a *fixation* to occur.
 
 $$ \delta = Fixation\ Threshold > Longest\ Saccade\ Duration = 120 ms $$
 
-We assume that after the user has *fixated* on the target element, the user is aware of it's presence. In situations where the user's only intent is to select the element, further fixations indicate gazing away from the target, or trouble selecting the target. The interpretation of this may change as data is available from the audio and video recording of the user. If a fixation is recorded but the user is unaware of the element (e.g. a recorded fixation of a target button, but the user continues searching) should be recorded as *false fixations*. Many false fixations may indicate a problem recording fixations or that an adjustment is required to fixation detection parameters.
+We assume that after the user has *fixated* on the target element, the user is aware of it's presence. In situations where the user's only intent is to select the target element, further fixations indicate gazing away from the target, or trouble selecting the target. The interpretation of this may change as data is available from the audio and video recording of the user. If a fixation is recorded but the user is unaware of the element (e.g. a recorded fixation of a target button, but the user continues searching) should be recorded as *false fixations*. Many false fixations may indicate a problem recording fixations or that an adjustment is required to fixation detection methods or parameters.
 
 
 
@@ -98,39 +108,43 @@ A variety of data will be logged during each trial to analyze EyeJS performance 
 
 ### Mouse Movements and Clicks
 
-Mouse movement and clicking will be logged so we can compare that data to eye-tracking data when the user is using the mouse. *(e.g. How long does it take for the user to click an element after they have fixated on it?)*
+Mouse movements and clicking will be logged so we can compare that data to eye-tracking data when the user is using the mouse. *(e.g. How long does it take for the user to click an element after they have fixated on it?)*
 
 ### User Audio and Video
 
 Video will be recorded using a webcam, and synced with the trial. Using this data, we can gain insight into what the user's intent was, while comparing that with their observed eye tracking and mouse data.
 
-### Eye Tracking
+### Eye Tracking Measurements
 
 All eye tracking data will be logged, even if the user is currently interacting via the mouse. This will allow us to compare EyeJS interaction with that of the standard mouse. Eye activity will be logged and synced separately from EyeJS for later for analysis.
 
 ![](images/eye-measurements.svg)
 
-#### Element Activation Time
+#### Task Time
 
-Generally, we are concerned with how long it takes the user to select some element (i.e. a button or anchor) using their assigned tool (mouse, blinking, etc.). This can be measured by observing the time between element activations within the task. In the diagram above, this would correspond to the difference between the last element activation (or task start) and the target element's activation.
+Generally, we are concerned with how long it takes the user to select some element (i.e. a button or anchor) using their assigned input mode (mouse, blinking, or keypress). This can be measured by observing the time between element activations within the task. In the diagram above, this would correspond to the difference between the last element activation (or first task start) and the target element's activation.
 
-We define $Task\ Time$ $(T)$ according to the diagram above as follows:
+We define *Task Time* for the $ i ^{th} $ task of an experiment, $T \_{i} $, according to the diagram above as follows:
 
-$$ T = Task\ Time = t\_{end} - t\_{start} $$
+$$ T \_{i} = t\_{end} - t\_{start} $$
 
 #### Number of Fixations
 
-We are also interested in the number of times the user fixates on a target element. A singular fixation-selection indicates the user looks at the target element and selects it without changing their gaze. This is probably an ideal scenario, and it's likely that the user will shift their gaze before activating the element. For example, this could happen if they are using the mouse, they quickly shift their gaze to locate their cursor before activating the element. Or, this could be observed when activating an element using a keypress, when the user quickly looks at the keyboard to confirm they are about to press the correct key.
+We are also interested in the number of times the user fixates on a target element. A singular fixation-selection indicates the user looks at the target element and selects it without changing their gaze. This is probably an ideal scenario, and it is likely that the user will shift their gaze before activating the element. For example, this could happen if they are using the mouse, they quickly shift their gaze to locate their cursor before activating the element. Also, this could be observed when activating an element using a keypress, when the user quickly looks at the keyboard to confirm they are about to press the correct key.
 
-In the above diagram, fixations are indexed $0...n-1$. We can define the set of fixations over the target element as $F$, where $ \left| F \right| = n $.
+The above diagram shows a series of fixations over a target element, indexed $0...n-1$. We will record all fixations of all elements as the set $F$ and fixations over the target element as set $Q$. We are specifically interested in measuring the number of fixations over the target element, $ \left| Q \right| = n $, but are also interested in the total number of fixations, $ \left| F \right| $.
 
 #### Length of Fixations
 
-We want to measure the length of each fixation. This will help us determine if the user dwells on a target for differing lengths of time depending on which mode of input they are using.
+Fixations will be recorded as tuples consisting of the element the user is fixated on, and the duration of the fixation, so for some fixation $f$,
+
+$$ f = (fixated\ element, fixation\ duration) $$
+
+Measuring the length of each fixation will help us determine if the user dwells on a target for differing lengths of time depending on which mode of input they are using. This is measured as the difference in time between when the fixation starts, and when it ends. This will always be greater than $ \delta $.
 
 #### Time from First Fixation
 
-How long does it take for the user to select an element after the first fixation, regardless of the number of fixations? This is important to measure how long it takes the user from first recognizing the target element, and actually activating it.
+How long does it take for the user to select an element after their first fixation, regardless of the number of fixations? Since we can be assured the user intended to select the element during the last fixation, if there is a significant difference between the *Time from Last Fixation* and the *Time from First Fixation*, we should investigate if the fixations are being erroneously recorded.
 
 #### Time from Last Fixation
 
@@ -140,13 +154,15 @@ Measuring from the start of the last fixation, how long does it take the user to
 
 This is the time between the last fixation and when the user select the element. If using blinks, this time corresponds to the blink activation time. If using keypresses, this could represent the user looking away from the screen and to the keyboard.
 
+### Accuracy
+
+User selection accuracy, $A$ will be measured as the ratio of intended element selections to total element selections.
+
+$$ A = \frac{Intended\ Selections}{Total\ Selections} $$
+
+For most tasks, the intended selection will be clear from the directions given to the user. If it is unclear, then the video and audio records of the user will be used to determine what their intention was.
 
 ## Experiments
-
-- Synthetic Interaction
-- Wikipedia Navigation and Information Extraction
-- Amazon.com Navigation and Information Extraction
-- Reading Comprehension with Fading Sidebar
 
 ### Synthetic User Interface
 
@@ -181,42 +197,6 @@ The distance between interactive elements is expected to affect the accuracy of 
 The size of the gaze indicator can change ... although this may take some testing to figure out how.
 
 ![](images/gaze-indicator-size.png)
-
-#### Measurements
-
-Measurements will be taken on a per-stage basis, given by $s \in S$.
-
-##### Accuracy
-
-Accuracy will be measured by the ratio of correct button activations to total button activations.
-
-$$ Accuracy = \frac{Correct\ Selections}{Total\ Selections} $$
-
-##### Execution Time
-
-How long does it take for the user to complete the sequence?
-
-$$ Execution\ Time = t\_{end} - t\_{start} $$
-
-##### Lag Time
-
-Lag time is defined as the time between a certain fixation on a target and it's subsequent activation. We will measure lag time from two different fixations, the first fixation on the target, and the last fixation.
-
-$$ lag\_{ff} = t(f\_{n - 1}) - t(f\_{0}) $$
-
-$$ lag\_{lf} = t(f\_{n - 1}) - t(f\_{n - 2}) $$
-
-##### Number of Fixations
-
-We are also interested in measuring the number of fixations on a target element between the activation of the previous target, and the search-select phase of the current target. If the number of fixations is more than 1, then the user is looking away from the element one or more times before activating. This is of particular interest when having the user select the element using a keypress.
-
-$$  $$
-
-##### Search Time
-
-How long does it take for the user to find the item they are looking for?
-
-
 
 
 
