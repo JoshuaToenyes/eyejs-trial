@@ -1,48 +1,224 @@
-# EyeJS Trial and Evaluation
+EyeJS Trial and Evaluation
+==========================
+
+## Trial Format
+
+Trial participants will be asked to participate in a series of experiments. Each experiment will be performed by each user three times, once using a standard mouse, once using EyeJS with keypress activation, and once using EyeJS blink activation. The order of the experiments and the order of the input modes they use to complete the task (mouse, keypress, blinking) will also be randomized.
+
+### Input Modes
+
+There are three distinct input modes for this trial. The keyboard will be used for text entry in all modes.
+
+#### Mouse ($ m $)
+
+The trial participants will use a standard mouse to select elements.
+
+#### Keypress ($ k $)
+
+Elements are selected using a keyboard keypress using EyeJS. In this mode, users gaze at a particular element, then press a key on the keyboard to select it.
+
+#### Blinks  ($ b $)
+
+Elements are selected using EyeJS blink selection. In this mode, users gaze at a particular element and use a noticeably longer blink to select elements.
+
+### Experiments Overview
+
+We will be conducting four experiments with each participant.
+
+#### Sythetic User Interface ($ s $)
+
+#### Wikipedia Navigation and Information Extraction ($ w $)
+
+#### Amazon.com Navigation and Information Extraction ($ a $)
+
+#### User Focus ($ f $)
+
+### Participant Randomization
+
+The order in-which participants complete experiments will be randomized, as well as the order of input modes they use. An example of participant experiment and input mode assignments are below. The experiment cells are tuples, the first element representing which experiment is being performed and the second the order of input modalities.
+
+| Participant        | First Experiment  | Second Experiment | Third Experiment  | Fourth Experiment |
+| ------------------ | :---------------: | :---------------: | :---------------: | :---------------: |
+| John               | $ (s, kmb) $      | $ (w, kbm) $      | $ (f, mkb) $      | $ (a, bkm) $      |
+| Jane               | $ (w, mbk) $      | $ (s, mkb) $      | $ (a, mbk) $      | $ (f, kbm) $      |
+| Mike               | $ (a, kbm) $      | $ (w, kbm) $      | $ (f, kmb) $      | $ (s, kmb) $      |
+
 
 ## Things to Avoid
 
 ### Don't Evaluate the Webpage
 
-We don't want to evaluate the design or usability of the webpages used during this trial. Only the amount of time taken to *activate* navigation elements, and accuracy should be considered, not the amount of time taken to *locate* the navigation element. However, when the user is finding information and we are considering distraction caused by EyeJS, we should not give hints or clues as-to where that information is located.
+We don't want to evaluate the design or usability of the webpages used during this trial. Only the amount of time taken to *select* navigation elements, and accuracy should be considered, not the amount of time taken to *locate* the navigation element. However, when the user is finding information and we are considering distraction caused by EyeJS, we should not give hints or clues as-to where that information is located.
+
 
 
 ## Questions to Answer
 
 ### Primary Questions
 
-- Can the user effectively navigate websites and perform common tasks using EyeJS?
-- How does the speed and accuracy of EyeJS usage compare to that of a standard mouse?
+- How does user accuracy change when using EyeJS compared to a standard mouse?
+- How does using EyeJS affect the speed of task completion?
+- When using EyeJS, are keypress activations more accurate than blinks?
+- When using EyeJS, how does activation time compare between using keypresses and blinks?
+- How small can buttons and other interactive elements get before accuracy and selection ability start to degrade?
+- How close can interactive elements get before accuracy and selection ability start to degrade?
 
 ### Secondary Question
 
+- How large should the gaze area (gaze indicator) be?
 - Does a visible gaze indicator increase or decrease user speed and/or accuracy?
 - Does automatic page scrolling decrease the amount of time it takes for users to perform the tasks?
 
 
-## Tasks
+
+## Assumptions and Parameters
+
+### Gaze Area
+
+![](images/gaze-area.svg)
+
+### Fixation Time
+
+We consider a *fixation* to have occurred after the longest possible saccade (in duration). So, if the user's gaze remains over a specific element for a greater period of time than the longest saccade, then we consider this a fixation of that element. Eye tracker samples which indicate the user's gaze is over a specific element, but do not sample that same element for longer than some fixation threshold should be ignored.
+
+![](images/saccade-ignore.svg)
+
+We define as fixation threshold as $\delta$ as the minimum amount of time the user's gaze must be continually over an element for a *fixation* to occur.
+
+$$ \delta = Fixation\ Threshold > Longest\ Saccade\ Duration = 120 ms $$
+
+We assume that after the user has *fixated* on the target element, the user is aware of it's presence. In situations where the user's only intent is to select the element, further fixations indicate gazing away from the target, or trouble selecting the target. The interpretation of this may change as data is available from the audio and video recording of the user. If a fixation is recorded but the user is unaware of the element (e.g. a recorded fixation of a target button, but the user continues searching) should be recorded as *false fixations*. Many false fixations may indicate a problem recording fixations or that an adjustment is required to fixation detection parameters.
+
+
+
+
+## Data and Measurements
+
+A variety of data will be logged during each trial to analyze EyeJS performance and how the user interacted with the computer using EyeJS.
+
+### Mouse Movements and Clicks
+
+Mouse movement and clicking will be logged so we can compare that data to eye-tracking data when the user is using the mouse. *(e.g. How long does it take for the user to click an element after they have fixated on it?)*
+
+### User Audio and Video
+
+Video will be recorded using a webcam, and synced with the trial. Using this data, we can gain insight into what the user's intent was, while comparing that with their observed eye tracking and mouse data.
+
+### Eye Tracking
+
+All eye tracking data will be logged, even if the user is currently interacting via the mouse. This will allow us to compare EyeJS interaction with that of the standard mouse. Eye activity will be logged and synced separately from EyeJS for later for analysis.
+
+![](images/eye-measurements.svg)
+
+#### Element Activation Time
+
+Generally, we are concerned with how long it takes the user to select some element (i.e. a button or anchor) using their assigned tool (mouse, blinking, etc.). This can be measured by observing the time between element activations within the task. In the diagram above, this would correspond to the difference between the last element activation (or task start) and the target element's activation.
+
+We define $Task\ Time$ $(T)$ according to the diagram above as follows:
+
+$$ T = Task\ Time = t\_{end} - t\_{start} $$
+
+#### Number of Fixations
+
+We are also interested in the number of times the user fixates on a target element. A singular fixation-selection indicates the user looks at the target element and selects it without changing their gaze. This is probably an ideal scenario, and it's likely that the user will shift their gaze before activating the element. For example, this could happen if they are using the mouse, they quickly shift their gaze to locate their cursor before activating the element. Or, this could be observed when activating an element using a keypress, when the user quickly looks at the keyboard to confirm they are about to press the correct key.
+
+In the above diagram, fixations are indexed $0...n-1$. We can define the set of fixations over the target element as $F$, where $ \left| F \right| = n $.
+
+#### Length of Fixations
+
+We want to measure the length of each fixation. This will help us determine if the user dwells on a target for differing lengths of time depending on which mode of input they are using.
+
+#### Time from First Fixation
+
+How long does it take for the user to select an element after the first fixation, regardless of the number of fixations? This is important to measure how long it takes the user from first recognizing the target element, and actually activating it.
+
+#### Time from Last Fixation
+
+Measuring from the start of the last fixation, how long does it take the user to select the element? If there is only a single fixation, then this will be the same as *Time from First Fixation*. This tells us how long the user dwells on an object before activating it. For example, if the user is using a mouse, this will indicate how long it takes for the user to get the mouse over the target and select it, while still dwelling on the target.
+
+#### Away Time
+
+This is the time between the last fixation and when the user select the element. If using blinks, this time corresponds to the blink activation time. If using keypresses, this could represent the user looking away from the screen and to the keyboard.
+
+
+## Experiments
 
 - Synthetic Interaction
 - Wikipedia Navigation and Information Extraction
 - Amazon.com Navigation and Information Extraction
 - Reading Comprehension with Fading Sidebar
 
-### Synthetic Navigation Task
+### Synthetic User Interface
 
-This task will present the user with a variety of navigation buttons and elements on a single page. They will need to activate a random dictated sequence of elements using EyeJS or the mouse. Speed and accuracy will be
-considered. The elements will be of random size and position.
+This task will measure the efficacy of the user when using a mouse or EyeJS when presented with a synthetic user interface and button activation tasks.
 
 #### Task Description
 
-This task will be a series of screens with interactive buttons, each labeled with a letter. With each successive screen, the buttons will change size (get smaller as difficulty increases) and the density will change (how close buttons are to each other).
+This task will present the user with a screen of uniformly sized buttons and a sequence of capital letters. Each button will be randomly labeled by a single capital letter. The user must select the buttons in a specific randomly generated sequence. As the trial continues, the size of the buttons will decrease and the distance between them will change.
 
-During the trial we will also vary the size of the gaze area (gaze indicator).
+![](images/button-layout.svg)
 
 #### Things to Consider
 
 - The difference in speed and accuracy of the user when using EyeJS versus a standard mouse.
 - How size and density of interactive elements affect the speed and accuracy of the user.
 - How does the gaze area (size of the gaze indicator) affect the user's speed and accuracy.
+
+#### What's Changing
+
+During this experiment, the following parameters will change: the size of the buttons, the margin between the buttons, and the size of the gaze indicator.
+
+##### Button Size
+
+The size of the buttons will progressively decrease. Each stage will reduce the button size by a factor of $\frac{3}{4}$. For instance, if the buttons start at 100x100 pixels, the second stage will feature buttons of 75x75 pixels, and the next 56x56 pixels, 42x42, 31x31, and so on.
+
+![](images/changing-button-size.svg)
+
+##### Button Margin
+The distance between interactive elements is expected to affect the accuracy of the user. Therefore, for each stage we will vary the distance between the buttons that the user must select. An example margin sequence (in pixels) is 100, 75, 50, 25, 10, 5.
+
+##### Gaze Indicator Size
+The size of the gaze indicator can change ... although this may take some testing to figure out how.
+
+![](images/gaze-indicator-size.png)
+
+#### Measurements
+
+Measurements will be taken on a per-stage basis, given by $s \in S$.
+
+##### Accuracy
+
+Accuracy will be measured by the ratio of correct button activations to total button activations.
+
+$$ Accuracy = \frac{Correct\ Selections}{Total\ Selections} $$
+
+##### Execution Time
+
+How long does it take for the user to complete the sequence?
+
+$$ Execution\ Time = t\_{end} - t\_{start} $$
+
+##### Lag Time
+
+Lag time is defined as the time between a certain fixation on a target and it's subsequent activation. We will measure lag time from two different fixations, the first fixation on the target, and the last fixation.
+
+$$ lag\_{ff} = t(f\_{n - 1}) - t(f\_{0}) $$
+
+$$ lag\_{lf} = t(f\_{n - 1}) - t(f\_{n - 2}) $$
+
+##### Number of Fixations
+
+We are also interested in measuring the number of fixations on a target element between the activation of the previous target, and the search-select phase of the current target. If the number of fixations is more than 1, then the user is looking away from the element one or more times before activating. This is of particular interest when having the user select the element using a keypress.
+
+$$  $$
+
+##### Search Time
+
+How long does it take for the user to find the item they are looking for?
+
+
+
+
 
 
 ### Wikipedia Task
@@ -74,7 +250,7 @@ This task tests the user's ability locate and interpret specific information on 
 #### Things to Consider
 
 - Can the user navigate a link-dense environment like Amazon.com?
-- Are they able to discover that they can activate videos by looking at them, and pressing the *select* button?
+- Are they able to discover that they can select videos by looking at them, and pressing the *select* button?
 - Does image *zooming* distract the user?
 
 #### Task Sequence
@@ -102,4 +278,4 @@ To ensure that the user is aware of the sidebar content, we will at some point r
 
 #### Possible Variation
 
-Include scrolling variations to determine if automatic scrolling helps or hinders the user. 
+Include scrolling variations to determine if automatic scrolling helps or hinders the user.
