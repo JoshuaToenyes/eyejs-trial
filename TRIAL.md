@@ -47,9 +47,9 @@ The order in-which participants complete experiments will be randomized, as well
 
 | Participant        | First Experiment  | Second Experiment | Third Experiment  | Fourth Experiment |
 | ------------------ | :---------------: | :---------------: | :---------------: | :---------------: |
-| John               | $ (s, kmb) $      | $ (w, kbm) $      | $ (f, mkb) $      | $ (a, bkm) $      |
-| Jane               | $ (w, mbk) $      | $ (s, mkb) $      | $ (a, mbk) $      | $ (f, kbm) $      |
-| Mike               | $ (a, kbm) $      | $ (w, kbm) $      | $ (f, kmb) $      | $ (s, kmb) $      |
+| John               | $(s, kmb)$        | $(w, kbm)$        | $(f, mkb)$        | $(a, bkm)$        |
+| Jane               | $(w, mbk)$        | $(s, mkb)$        | $(a, mbk)$        | $(f, kbm)$        |
+| Mike               | $(a, kbm)$        | $(w, kbm)$        | $(f, kmb)$        | $(s, kmb)$        |
 
 
 ## Things to Avoid
