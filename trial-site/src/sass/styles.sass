@@ -1,0 +1,66 @@
+@charset "UTF-8"
+
+// Styles Reset
+@import "meyer-reset/meyer-reset"
+
+// Utilities and Libraries
+@import "bourbon/bourbon"
+@import "neat/neat"
+@import "base/base"
+@import "animated/animated"
+
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700,300)
+@import url(http://fonts.googleapis.com/css?family=Lusitana:400,700)
+@import url(http://fonts.googleapis.com/css?family=Merriweather:400italic)
+
+@import 'variables'
+@import 'typography'
+
++anim(fade-in-down)
++anim(fade-out-left-big)
+
+body
+  +outer-container
+
+input
+  max-width: 50%
+
+button
+  padding: 0.8em 1.67em
+
+button:after
+  content: ' ▸'
+  font-weight: bold
+
+button.experiment
+  display: block
+  width: 50%
+  margin: 0 0 1em
+
+.previous
+  font-size: 0.8em
+  opacity: 0.5
+  margin: 0.5em 1.3em
+  cursor: pointer
+  +transition(opacity 1s)
+  &:hover
+    opacity: 1
+  &:before
+    content: '◂ '
+    font-weight: bold
+
+.center
+  text-align: center
+
+.view
+  +span-columns(12)
+  padding: 1rem
+  position: absolute
+  display: none
+
+  &.show
+    +animate(fade-in-down, 1s)
+    display: block
+
+  &.hide
+    +animate(fade-out-left-big, 1s)

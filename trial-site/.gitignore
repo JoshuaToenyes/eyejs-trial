@@ -1,0 +1,9 @@
+.idea/
+.sass-cache/
+doc/
+node_modules/
+dist/
+test/*.js
+npm-debug.log
+tmp/
+*.log

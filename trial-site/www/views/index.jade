@@ -1,0 +1,44 @@
+extends _root
+
+block content
+  
+  .view.show
+    h1 Hello!
+    p Thanks for participating in the EyeJS trial! Let's get you set up.
+    button.start.next Start
+
+  .view
+    h2 What's your name?
+    p In case the trial is interrupted, this will let us resume where you left
+      | off.
+    label(for='name') First Name
+    input(type='text', id='name', placeholder='Your Name')
+    button.name.next Next
+
+  .view
+    h2 Basic Info
+    p Let's get some basic information about you. This will help us crunch the
+      | number and better understand our results.
+    label(for='age') How old are you?
+    input(type='number', id='age', value='30')
+      
+    label(for='occupation') What is your occupation?
+    input(type='text', id='occupation', placeholder='Student')
+    
+    button.info.next Next
+    .previous Previous
+
+  .view
+    h2 You're Ready!
+    p There are four experiments you'll be performing. Each experiment will be 
+      | conducted three times using different input devices and rules.
+    p Don't worry, they're quick :)
+    
+    #experiments
+      button#e_s.experiment Sythetic User Interface
+      button#e_w.experiment Navigation on Wikipedia
+      button#e_a.experiment Navigation on Amazon.com
+      button#e_f.experiment Reading
+      button#e_n.experiment Natural Use
+  
+    .previous Previous
