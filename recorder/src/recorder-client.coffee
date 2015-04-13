@@ -37,14 +37,13 @@ send = (msg) ->
 
 window.addEventListener 'DOMContentLoaded', ->
 
-  try
-    socket = new WebSocket 'ws://localhost:5226'
-    socket.onopen = ->
-      console.log 'WebSocket connected.'
-      connected = true
-      sendQueue()
-  catch e
-    console.error 'Cannot connect to recorder server.', e
+  socket = new WebSocket 'ws://localhost:5226'
+  socket.onopen = ->
+    console.log 'WebSocket connected.'
+    connected = true
+    sendQueue()
+  socket.onclose = ->
+    alert 'Recorder server connection closed, or failed to connect.'
 
   send event: 'DOMContentLoaded', location: window.location.href
 

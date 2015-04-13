@@ -18,9 +18,14 @@
 
 +anim(fade-in-down)
 +anim(fade-out-left-big)
++anim(fade-out-right-big)
 
 body
+  overflow: hidden
   +outer-container
+
+.wrapper
+  +span-columns(12)
 
 input
   max-width: 50%
@@ -32,10 +37,23 @@ button:after
   content: ' ▸'
   font-weight: bold
 
-button.experiment
+button.wide
   display: block
-  width: 50%
+  min-width: 50%
   margin: 0 0 1em
+
+button.hide
+  display: none
+
+button.done
+  background-color: $GREEN
+
+  &:before
+    content: '✓ '
+    padding-right: 4px
+
+  &:after
+    content: ''
 
 .previous
   font-size: 0.8em
@@ -53,14 +71,19 @@ button.experiment
   text-align: center
 
 .view
-  +span-columns(12)
-  padding: 1rem
+  padding: 2em
   position: absolute
   display: none
+  width: 100%
+
+  &.show, &.hide
+    display: block
 
   &.show
     +animate(fade-in-down, 1s)
-    display: block
 
   &.hide
     +animate(fade-out-left-big, 1s)
+
+  &.hide.right
+    +animate(fade-out-right-big, 1s)
