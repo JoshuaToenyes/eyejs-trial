@@ -8,86 +8,150 @@ block content
     button.participant-start.next Start
 
   .view
-    h2 What's Your Name?
-    p This is so we can match-up the recorded data to the person.
-    label(for='name') First Name
-    input(type='text', id='name', placeholder='Your Name')
-    button.name.next Next
+    h2 Who are you?
+    hr
+    .container
+      p This is so we can match-up the recorded data and contact you if we
+        | have any questions. <em>Of course, it's totally optional.</em>
+      label(for='firstname') First Name
+      input(type='text', id='firstname', placeholder='John')
+      label(for='firstname') Last Name
+      input(type='text', id='lastname', placeholder='Smith')
+      label(for='email') Email Address
+      input(type='text', id='email', placeholder='john.smith@aol.com')
+    .center
+      hr
+      button.name.next Next
 
   .view
-    h2 Basic Info
-    p Let's get some basic information about you. This will help us crunch the
-      | number and better understand our results.
-    label(for='age') How old are you?
-    input(type='number', id='age', value='30')
+    h2 Tell us about yourself :)
+    hr
+    .container
+      p Let's get some basic information about you. This will help us crunch the
+        | numbers and better understand our results.
+      label(for='age') How old are you?
+      input(type='number', id='age', value='30')
+      label(for='occupation') What is your occupation?
+      input(type='text', id='occupation', placeholder='Student')
+    
+    .center
+      hr
+      button.info.next Next
+      .previous Previous
+
+  .view
+    h2 Let's show you around
+    hr
+    .container
+      p Your interviewer will now show you how to use your eyes to control
+        | the browser. You'll learn about the following:
+        ul
+          li basic gazing
+          li back and forward navigation
+          li scrolling up and down
+          li using the <code>control</code> key to select
+          li blinking to select
+    .center
+      hr
+      button.name.next Next
+      .previous Previous
+    
+  .view
+    h2 Use your eyes!
+    hr
+    .container
+      p Let's visit <em>The Verge</em> to browse around a real website. Feel free to use
+        | the <code>control</code> key or blinking to navigate. Whatever feels the most 
+        | comfortable for you.
+      p Visit 
+        a(href='http://theverge.com', target='_blank') <em>The Verge</em>
+        |. When you're done, just close the window.
+    .center
+      hr
+      button.name.next Next
+      .previous Previous
+
+  .view
+    h2 Let's do this!
+    hr
+    .container
+      p There are five experiments you'll be performing. Each experiment will be 
+        | conducted three times; once using a regular mouse, once using the 
+        | <code>control</code> key to select items, and once using blinking.
+      p Don't worry, they're quick :)
       
-    label(for='occupation') What is your occupation?
-    input(type='text', id='occupation', placeholder='Student')
-    
-    button.info.next Next
-    .previous Previous
-
-  .view
-    h2 Let's Do This!
-    p There are five experiments you'll be performing. Each experiment will be 
-      | conducted three times using different input devices.
-    p Don't worry, they're quick :)
-    
-    #experiments
-      button#e_s.experiment.root.wide Sythetic User Interface
-      button#e_w.experiment.root.wide Navigation on Wikipedia
-      button#e_a.experiment.root.wide Navigation on Amazon.com
-      button#e_f.experiment.root.wide Reading
-      button#e_n.experiment.root.wide Natural Use
-    .previous Previous
+      #experiments
+        button#e_s.experiment.root.wide Synthetic User Interface
+        button#e_w.experiment.root.wide Navigation on Wikipedia
+        button#e_a.experiment.root.wide Navigation on Amazon.com
+        button#e_f.experiment.root.wide Reading Focus
+        button#e_n.experiment.root.wide Natural Use
+    .center
+      hr
+      .previous Previous
 
   #done.view.center
     h1 Sweet!
     p: em That's it! Thank you so much for your time :)
 
   .view.e_s(data-experiment='s')
-      
-    h2 Synthetic User Interface
-    p This experiment will present you with a page full of buttons. 
-      | You will select a number of buttons, which will change in size, 
-      | to match a sequence of letters.
-    p: em Please follow the directions of your interviewer, and let them know if
-      | you have any questions.
-    button.experiment.start(data-link='http://google.com') Start
-    .experiment.previous Previous
+    h2 Synthetic UI
+    hr
+    .container
+      p This experiment will present you with a page full of buttons. 
+        | You will select a number of buttons, which will change in size, 
+        | to match a sequence of letters.
+      p: em Please follow the directions of your interviewer, and let them know if
+        | you have any questions.
+      button.experiment.start(data-link='http://google.com') Start
+    .center
+      hr
+      .experiment.previous Previous
 
   .view.e_w(data-experiment='w')
-    
-    h2 Navigation on Wikipedia
-    p: em Please follow the directions of your interviewer, and let them know if
-      | you have any questions.
-    button.experiment.start(data-link='http://wikipedia.com') Start
-    .experiment.previous Previous
+    h2 Wikipedia Navigation
+    hr
+    .container
+      p: em Please follow the directions of your interviewer, and let them know if
+        | you have any questions.
+      button.experiment.start(data-link='http://wikipedia.com') Start
+    .center
+      hr
+      .experiment.previous Previous
     
   .view.e_a(data-experiment='a')
-    
-    h2 Navigation on Amazon.com
-    p: em Please follow the directions of your interviewer, and let them know if
-      | you have any questions.
-    button.experiment.start(data-link='http://amazon.com') Start
-    .experiment.previous Previous
+    h2 Amazon Navigation
+    hr
+    .container
+      p: em Please follow the directions of your interviewer, and let them know if
+        | you have any questions.
+      button.experiment.start(data-link='http://amazon.com') Start
+    .center
+      hr
+      .experiment.previous Previous
     
   .view.e_f(data-experiment='f')
-    
-    h2 Reading
-    p: em Please follow the directions of your interviewer, and let them know if
-      | you have any questions.
-    button.experiment.start(data-link='http://google.com') Start
-    .experiment.previous Previous
+    h2 Reading Focus
+    hr
+    .container
+      p: em Please follow the directions of your interviewer, and let them know if
+        | you have any questions.
+      button.experiment.start(data-link='http://google.com') Start
+    .center
+      hr
+      .experiment.previous Previous
     
   .view.e_n(data-experiment='n')
-    
     h2 Natural Use
-    p Awesome! Last one. Please browse around Wikipedia.com as long as you'd 
-      | like, and visit whatever you think is interesting. There's nothing
-      | special about this one. Just use the eye-based interface however you'd 
-      | like :)
-    p: em Please describe to the interviewer any problems you have and how you
-      | feel using your eyes for navigation.
-    button.experiment.singular(data-link='http://wikipedia.com') Perform using <em>Eyes Only</em>
-    .experiment.previous Previous
+    hr
+    .container
+      p Awesome! Last one. Please browse around Wikipedia.com as long as you'd 
+        | like, and visit whatever you think is interesting. There's nothing
+        | special about this one. Just use the eye-based interface however you'd 
+        | like :)
+      p: em Please describe to the interviewer any problems you have and how you
+        | feel using your eyes for navigation.
+      button.experiment.singular(data-link='http://wikipedia.com') Perform using <em>Eyes Only</em>
+    .center
+      hr
+      .experiment.previous Previous

@@ -20,15 +20,23 @@
 +anim(fade-out-left-big)
 +anim(fade-out-right-big)
 
+html, body
+  width: 100%
+  height: 100%
+
 body
   overflow: hidden
   +outer-container
 
 .wrapper
   +span-columns(12)
+  overflow: scroll
+  height: 100%
 
-input
-  max-width: 50%
+ul
+  list-style: disc
+  li
+    margin-left: 1.1em
 
 button
   padding: 0.8em 1.67em
@@ -39,8 +47,14 @@ button:after
 
 button.wide
   display: block
-  min-width: 50%
+  width: 100%
   margin: 0 0 1em
+
+button.participant-start,
+  margin-top: 2em
+
+hr
+  margin-top: 2em
 
 button.hide
   display: none
@@ -70,9 +84,18 @@ button.done
 .center
   text-align: center
 
+.container
+  width: 60%
+  text-align: left
+  margin: 1em auto 0
+
+.clear
+  +clearfix
+
 .view
   padding: 2em
-  position: absolute
+  position: relative
+  top: 0
   display: none
   width: 100%
 
@@ -83,6 +106,7 @@ button.done
     +animate(fade-in-down, 1s)
 
   &.hide
+    position: absolute
     +animate(fade-out-left-big, 1s)
 
   &.hide.right

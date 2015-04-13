@@ -56,7 +56,7 @@ wsServer.on 'request', (req) ->
 
       if open then output.write msg.utf8Data + '\n', 'utf8'
 
-      if m.event is 'participant end'
+      if m.event is 'participant end' or m.event is 'stop recording'
         closeOpenFile()
 
     else
