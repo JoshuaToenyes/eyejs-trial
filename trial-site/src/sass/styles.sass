@@ -111,3 +111,38 @@ button.done
 
   &.hide.right
     +animate(fade-out-right-big, 1s)
+
+#sequence, #blocks-container
+  text-align: center
+
+#sequence
+  font-size: 2em
+  letter-spacing: 0.3em
+  margin: 0.5em 0
+
+  span
+    +transition(color 1s)
+
+  .correct
+    color: #eee
+
++keyframes(pulseRed)
+  50%
+    background-color: lighten(red, 20%)
+
+#blocks
+  margin: 0 auto 0
+
+  button
+    padding: 0
+    margin: 0
+    +transition(background-color 1s)
+
+  button:after
+    content: ''
+
+  button.correct
+    background-color: #eee
+
+  button.wrong
+    +animation(pulseRed 1s ease-in)

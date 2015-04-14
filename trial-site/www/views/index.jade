@@ -1,6 +1,7 @@
 extends _root
 
 block content
+  script(src='/js/scripts.js')
   
   .view.center.show
     h1 Hello!
@@ -103,7 +104,7 @@ block content
         | to match a sequence of letters.
       p: em Please follow the directions of your interviewer, and let them know if
         | you have any questions.
-      button.experiment.start(data-link='http://google.com') Start
+      button.experiment.start(data-link='http://localhost:3000/sui') Start
     .center
       hr
       .experiment.previous Previous

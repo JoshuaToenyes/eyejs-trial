@@ -31,7 +31,8 @@ module.exports = (grunt) ->
     browserify:
       client:
         files:
-          'www/js/scripts.js': ['tmp/**/*.js']
+          'www/js/scripts.js': ['tmp/scripts.js']
+          'www/js/sui.js': ['tmp/sui.js']
 
     sass:
       client:
@@ -66,7 +67,7 @@ module.exports = (grunt) ->
 
     clean:
       www: ['www/*.js']
-      client: ['www/js/*.js', 'www/css/*.css']
+      client: ['www/js/scripts.js', 'www/js/sui.js', 'www/css/*.css']
 
 
 
