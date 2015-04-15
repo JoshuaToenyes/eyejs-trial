@@ -35,6 +35,7 @@ renderBlocks = (size, margin, sequence) ->
       height: size + 'px'
       width: size + 'px'
       margin: margin + 'px'
+    $button.attr 'data-eyejs-snap', ''
     if currentSize < 25
       $button.css 'font-size', '0.9em'
     $row.append $button

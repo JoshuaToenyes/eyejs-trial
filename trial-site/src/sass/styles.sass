@@ -136,7 +136,10 @@ button.done
   button
     padding: 0
     margin: 0
-    +transition(background-color 1s)
+    +transition(background-color 350ms)
+
+  button[data-eyejs-fixated]
+    background-color: rgb(46,90,151)
 
   button:after
     content: ''

@@ -2,10 +2,11 @@ _ = require 'lodash'
 
 nodeIndex = (node) ->
   i = 0
-  children = node.parentNode.children
-  for c in children
-    if c is node then return i
-    i++
+  if node.parentNode and node.parentNode.children
+    for c in node.parentNode.children
+      if c is node then return i
+      i++
+  return i
 
 serializeNode = (node) ->
   if !node then return ''
