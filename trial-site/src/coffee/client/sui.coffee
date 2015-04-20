@@ -1,5 +1,6 @@
 _ = require 'lodash'
 
+recorder = require './../../recorder/dist/recorder-command'
 
 # The number of buttons to render
 COUNT = 12
@@ -87,7 +88,8 @@ done = ->
   $('#sequence').remove()
   $('#blocks').remove()
   $('#done').show()
-  console.log data
+  data.event = 'sui-complete'
+  recorder.send data
 
 calculateAccuracy = ->
   count = (activeTask.correct + activeTask.incorrect)

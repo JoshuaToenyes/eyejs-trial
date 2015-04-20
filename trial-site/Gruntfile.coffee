@@ -33,6 +33,7 @@ module.exports = (grunt) ->
         files:
           'www/js/scripts.js': ['tmp/scripts.js']
           'www/js/sui.js': ['tmp/sui.js']
+          'www/js/focus.js': ['tmp/focus.js']
 
     sass:
       client:

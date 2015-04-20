@@ -65,6 +65,10 @@ $ ->
     trial.experiments[e] = {}
     trial.experiments[e].inputOrder = _.shuffle ['m', 'k', 'b']
 
+  # Setup order for focus test.
+  delete trial.experiments['f'].inputOrder
+  trial.experiments['f'].order = _.shuffle ['with-fading', 'without-fading']
+
   # Add the randomize the experiment buttons.
   _.each experiments, (e) ->
     el = $("button#e_#{e}").remove()
@@ -81,7 +85,7 @@ $ ->
     show $('#experiments').parents('.view'), true
 
   # Re-label all the start buttons.
-  $('button.experiment.start:not(.singular)').each (i, el) ->
+  $('button.experiment.start:not(.singular):not(.double)').each (i, el) ->
     $el = $(el)
     ex = $el.parents('.view').data('experiment')
     makeLabel = (ex, i) ->
@@ -97,11 +101,16 @@ $ ->
           input: trial.experiments[ex].inputOrder[n]
         recorder.send msg
 
+        if trial.experiments[ex].inputOrder[n] is 'm'
+          postfix = '/?disable-eyejs'
+        else
+          postfix = '/?enable-eyejs'
+
         if n < 2
-          window.open $el.data('link')
+          window.open $el.data('link') + postfix
           $el.html makeLabel ex, ++n
         else
-          window.open $el.data('link')
+          window.open $el.data('link') + postfix
           $el.html 'You\'re Done!'
           $el.addClass('done')
           $el.off 'click', fn
@@ -130,6 +139,34 @@ $ ->
         show $('#experiments').parents('.view'), true
     return fn
   )()
+
+  $('button.experiment.double').click ((n) ->
+    fn = ->
+      $el = $(this)
+
+      fading = trial.experiments['f'].order[n]
+
+      msg =
+        event: 'experiment start'
+        experiment: 'f'
+        input: 'm'
+        fading: fading
+      recorder.send msg
+
+      if n < 1
+        window.open $el.data('link') + '?' + fading
+        $el.html 'One more time...'
+        n++
+      else
+        window.open $el.data('link') + '?' + fading
+        $el.html 'You\'re Done!'
+        $el.addClass('done')
+        $el.off 'click', fn
+        $el.click ->
+          $("button#e_n").addClass('done')
+          show $('#experiments').parents('.view'), true
+    return fn
+  )(0)
 
   # Create an interval to see if we're done with all the experiments.
   setInterval ->

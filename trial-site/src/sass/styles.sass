@@ -149,3 +149,28 @@ button.done
 
   button.wrong
     +animation(pulseRed 1s ease-in)
+
+// Focus App
+main.focus, aside.focus
+  min-height: 200px
+
+main.focus
+  +span-columns(9)
+
+  h1
+    font-size: 30px
+    margin: 1rem
+
+  p
+    margin: 1em
+
+aside.focus
+  +span-columns(3)
+  +omega
+  +transition(all 1s)
+  opacity: 0
+
+  img
+    width: 100%
+    height: auto
+    display: block
