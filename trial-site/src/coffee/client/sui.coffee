@@ -11,9 +11,11 @@ MARGINS = [20, 10, 2]
 
 SEQUENCE_LENGTH = 4
 
-REDUCE_FACTOR = 0.7
+REDUCE_FACTOR = 0.5
 
-currentSize = 300
+MIN_SIZE = 10
+
+currentSize = 250
 currentMarginIndex = MARGINS.length - 1
 selectionSequence = null
 data = {}
@@ -39,6 +41,8 @@ renderBlocks = (size, margin, sequence) ->
     $button.attr 'data-eyejs-snap', ''
     if currentSize < 25
       $button.css 'font-size', '0.9em'
+    if currentSize < 20
+      $button.css 'font-size', '0.7em'
     $row.append $button
   $('button').click check
   mt = $(window).height() / 2 - $('#blocks-container').height() / 2 - 100
@@ -65,9 +69,18 @@ next = ->
     correct: 0
     incorrect: 0
   activeTask = data[currentSize][nextMargin]
-  if currentSize < 17 then done()
+  if currentSize < MIN_SIZE then done()
+
+timer = null
+
+restartTimer = ->
+  clearTimeout timer
+  timer = setTimeout ->
+    done()
+  , 30000
 
 check = (e) ->
+  e.stopPropagation()
   $el = $(e.target)
   l = $el.text()
   if l is selectionSequence[0]
@@ -92,6 +105,7 @@ done = ->
   recorder.send data
 
 calculateAccuracy = ->
+  restartTimer()
   count = (activeTask.correct + activeTask.incorrect)
   acc = activeTask.correct / count
   if acc < 0.4 and count > 4 then done()
@@ -100,3 +114,6 @@ calculateAccuracy = ->
 $ ->
   next()
   $('button.done').click -> self.close()
+  $('body').click ->
+    activeTask.incorrect++
+    calculateAccuracy()

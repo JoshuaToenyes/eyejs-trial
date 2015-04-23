@@ -76,6 +76,9 @@ $ ->
     $(el).click ->
       show $(".view.e_#{e}")
 
+  # Enabled the first experiment.
+  $('#experiments button:first-child').removeAttr('disabled')
+
   # Whever a "previous" button is clicked in the context of an experiment
   # just go back to the list of experiments.
   $('.previous.experiment').click ->
@@ -115,7 +118,7 @@ $ ->
           $el.addClass('done')
           $el.off 'click', fn
           $el.click ->
-            $("button#e_#{ex}").addClass('done')
+            $("button#e_#{ex}").addClass('done').next().removeAttr('disabled')
             show $('#experiments').parents('.view'), true
       return fn
     )(0, ex)
@@ -135,7 +138,7 @@ $ ->
       $el.addClass('done')
       $el.off 'click', fn
       $el.click ->
-        $("button#e_n").addClass('done')
+        $("button#e_n").addClass('done').next().removeAttr('disabled')
         show $('#experiments').parents('.view'), true
     return fn
   )()
@@ -163,7 +166,7 @@ $ ->
         $el.addClass('done')
         $el.off 'click', fn
         $el.click ->
-          $("button#e_n").addClass('done')
+          $("button#e_f").addClass('done').next().removeAttr('disabled')
           show $('#experiments').parents('.view'), true
     return fn
   )(0)
