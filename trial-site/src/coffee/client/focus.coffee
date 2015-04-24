@@ -3,7 +3,7 @@ _ = require 'lodash'
 recorder = require './../../recorder/dist/recorder-command'
 
 $ ->
-  OFF_OPACITY = 0.1
+  OFF_OPACITY = 0.05
 
   options = [
     ''
@@ -76,11 +76,11 @@ $ ->
     selector = '#content2 select'
 
   $('button.done').click ->
-    sendResults()
     self.close()
 
-  sendResults = ->
+  window.sendResults = sendResults = ->
     results =
+      event:    'focus-results'
       tstart:   tstart
       tend:     _.now()
       selected: $(selector).length
@@ -89,6 +89,8 @@ $ ->
       if $(sel).val() is $(sel).attr('data-correct')
         results.correct++
     recorder.send results
+
+  $(window).on 'unload', sendResults
 
   setInterval ->
     allDone = true

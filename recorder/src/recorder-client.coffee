@@ -36,42 +36,40 @@ send = (msg) ->
   queue.push msg
   sendQueue()
 
-window.addEventListener 'DOMContentLoaded', ->
+socket = new WebSocket 'ws://localhost:5226'
+socket.onopen = ->
+  console.log 'WebSocket connected.'
+  connected = true
+  sendQueue()
+socket.onclose = ->
+  alert 'Recorder server connection closed, or failed to connect.'
 
-  socket = new WebSocket 'ws://localhost:5226'
-  socket.onopen = ->
-    console.log 'WebSocket connected.'
-    connected = true
-    sendQueue()
-  socket.onclose = ->
-    alert 'Recorder server connection closed, or failed to connect.'
+send event: 'DOMContentLoaded', location: window.location.href
 
-  send event: 'DOMContentLoaded', location: window.location.href
+window.addEventListener 'load', ->
+  send event: 'load', location: window.location.href
 
-  window.addEventListener 'load', ->
-    send event: 'load', location: window.location.href
+window.addEventListener 'unload', ->
+  send event: 'unload', location: window.location.href
 
-  window.addEventListener 'unload', ->
-    send event: 'unload', location: window.location.href
+sendMouseEvent = (type, e) ->
+  msg =
+    event:   type
+    screenX: e.screenX
+    screenY: e.screenY
+    clientX: e.clientX
+    clientY: e.clientY
+    element: serializeNode e.target
+  send msg
 
-  sendMouseEvent = (type, e) ->
-    msg =
-      event:   type
-      screenX: e.screenX
-      screenY: e.screenY
-      clientX: e.clientX
-      clientY: e.clientY
-      element: serializeNode e.target
-    send msg
+document.body.addEventListener 'mouseup', (e) ->
+  sendMouseEvent 'mouseup', e
 
-  document.body.addEventListener 'mouseup', (e) ->
-    sendMouseEvent 'mouseup', e
+document.body.addEventListener 'mousedown', (e) ->
+  sendMouseEvent 'mousedown', e
 
-  document.body.addEventListener 'mousedown', (e) ->
-    sendMouseEvent 'mousedown', e
-
-  document.body.addEventListener 'mousemove', (e) ->
-    sendMouseEvent 'mousemove', e
+document.body.addEventListener 'mousemove', (e) ->
+  sendMouseEvent 'mousemove', e
 
 module.exports =
   send: send

@@ -65,6 +65,8 @@ $ ->
     trial.experiments[e] = {}
     trial.experiments[e].inputOrder = _.shuffle ['m', 'k', 'b']
 
+  delete trial.experiments['n'].inputOrder
+
   # Setup order for focus test.
   delete trial.experiments['f'].inputOrder
   trial.experiments['f'].order = _.shuffle ['with-fading', 'without-fading']
@@ -149,6 +151,8 @@ $ ->
 
       fading = trial.experiments['f'].order[n]
 
+      content = _.shuffle ['content1', 'content2']
+
       msg =
         event: 'experiment start'
         experiment: 'f'
@@ -157,11 +161,11 @@ $ ->
       recorder.send msg
 
       if n < 1
-        window.open $el.data('link') + '?' + fading
+        window.open $el.data('link') + '?' + fading + '&' + content[0]
         $el.html 'One more time...'
         n++
       else
-        window.open $el.data('link') + '?' + fading
+        window.open $el.data('link') + '?' + fading + '&' + content[1]
         $el.html 'You\'re Done!'
         $el.addClass('done')
         $el.off 'click', fn
@@ -172,12 +176,40 @@ $ ->
   )(0)
 
   # Create an interval to see if we're done with all the experiments.
-  setInterval ->
+  expDoneCheck = setInterval ->
     allDone = true
     $('button.experiment.wide.root').each (i, el) ->
       if !$(el).hasClass('done')
         allDone = false
     if allDone
-      show $('#done')
-      recorder.send event: 'participant end', trial: trial
+      show $('.survey')
+      clearInterval expDoneCheck
+  , 100
+
+  # Fix-up the values on all the survey selects.
+  $('select.survey-item option').each (i, el) ->
+    $el = $(el)
+    $el.attr 'value', $el.text()
+
+  collectSurveyResults = ->
+    trial.survey = {}
+    $('.survey-item').each (i, el) ->
+      question = $(el).parents('label').contents().get(0).nodeValue
+      trial.survey[question] = $(el).val()
+
+  $('button.finish').click ->
+    collectSurveyResults()
+    trial.top = _.now()
+    recorder.send event: 'participant end', trial: trial
+    show $('#done')
+
+  # Create an interval to check if we're done with the survey.
+  surveyDoneCheck = setInterval ->
+    allDone = true
+    $('select.survey-item').each (i, el) ->
+      if $(el).val() is 'select one'
+        allDone = false
+    if allDone
+      $('button.finish').show()
+      clearInterval surveyDoneCheck
   , 100
