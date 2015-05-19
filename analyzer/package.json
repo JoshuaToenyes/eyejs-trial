@@ -1,0 +1,20 @@
+{
+  "name": "eyejs-trial-analyzer",
+  "description": "Analyzer for EyeJS trial.",
+  "author": "Joshua Toenyes <joshua.toenyes@me.com>",
+  "version": "0.0.0",
+  "dependencies": {
+    "lodash": "3.2.x",
+    "commander": "*",
+    "moment": "2.10.x",
+    "async": "*",
+    "glob": "*"
+  },
+  "devDependencies": {
+    "grunt": "0.4.x",
+    "grunt-coffeelint": "0.0.13",
+    "grunt-contrib-coffee": "0.11.x",
+    "grunt-contrib-clean": "0.6.x",
+    "grunt-contrib-watch": "0.6.x"
+  }
+}
