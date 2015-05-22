@@ -5,6 +5,7 @@ program = require 'commander'
 async   = require 'async'
 moment  = require 'moment'
 mathjs  = require 'mathjs'
+plotly  = require 'plotly'
 
 
 mapExperimentNames = (e) ->
@@ -25,6 +26,7 @@ mapInputNames = (e) ->
     when 'm' then 'Mouse'
 
 
+
 ##
 # Extracts the specified event from the passed data.
 extractEvent = (event, data) ->
@@ -33,10 +35,12 @@ extractEvent = (event, data) ->
   switch event
     when 'mouseclick' then events = extractMouseClicks(data)
     when 'experiment' then events = extractExperiments(data)
+    when 'sui-complete' then events = extractSUIEvents(data)
     else
       for datum in data
         if datum.event and datum.event is event then events.push datum
   events
+
 
 
 ##
@@ -58,8 +62,10 @@ extractEvents = (data, options) ->
   if options.load then union extractEvent('load', data)
   if options.unload then union extractEvent('unload', data)
   if options.experiment then union extractEvent('experiment', data)
+  if options.sui then union extractEvent('sui-complete', data)
 
   _.sortBy events, ((e) -> e.timestamp)
+
 
 
 ##
@@ -78,6 +84,29 @@ extractMouseClicks = (data) ->
   es
 
 
+
+##
+# Extracts the last sui-complete event and keys them with the input the
+# participant was using.
+extractSUIEvents = (data) ->
+  es = {}
+  currentInput = null
+  for datum in data
+    if datum.event and datum.event.match(/experiment/) and datum.experiment is 's'
+      currentInput = datum.input
+      es[currentInput] = []
+    if datum.event is 'sui-complete'
+      es[currentInput].push datum
+
+  for input of es
+    es[input] = _.sortBy es[input], ((e) -> e.timestamp)
+  for input of es
+    es[input] = es[input][es[input].length - 1]
+
+  es
+
+
+
 ##
 # Extracts mouse-click events from the passed data using the logged mouse-down
 # and mouse-up events.
@@ -88,6 +117,7 @@ extractExperiments = (data) ->
     if datum.event and datum.event.match /experiment/
       es.push datum
   es
+
 
 
 ##
@@ -117,6 +147,7 @@ parseLogFile = (filename, done, options) ->
       process.exit 1
     else
       done.call null, data, filename, options
+
 
 
 collectExperimentTimes = (data, filename, options) ->
@@ -163,10 +194,12 @@ collectExperimentTimes = (data, filename, options) ->
   return times
 
 
+
 displayHeader = (filename) ->
   console.log "
     \n-------------------------------------------------------------------------
     \nFilename: #{filename}\n"
+
 
 
 ##
@@ -197,6 +230,7 @@ displayTrialInfo = (data, filename) ->
       "
 
 
+
 ##
 # Displays extracted event data.
 displayExtractedEvents = (data, filename, options) ->
@@ -225,6 +259,7 @@ displayExtractedEvents = (data, filename, options) ->
 
 
 
+
 displayExperimentInfo = (data, filename, options) ->
   times = collectExperimentTimes data, filename, options
 
@@ -236,10 +271,18 @@ displayExperimentInfo = (data, filename, options) ->
 
 
 
+displaySUIInfo = (data, filename, options) ->
+  displayHeader filename
+
+
+
+
 info = (files, options) ->
   for file in files
     if options.experiment
       parseLogFile file, displayExperimentInfo, options
+    if options.sui
+      parseLogFile file, displaySUIInfo, options
     else
       parseLogFile file, displayTrialInfo, options
 
@@ -248,6 +291,109 @@ info = (files, options) ->
 extract = (files, options) ->
   for file in files
     parseLogFile file, displayExtractedEvents, options
+
+
+
+analyzeSUIExperiment = (files, options) ->
+  suiEvents = []
+
+  fn = (file, done) ->
+    async.waterfall [
+      (cb) ->
+        parseCb = ->
+          cb(null, arguments...)
+        parseLogFile file, parseCb, options
+      (data, filename, options, cb) ->
+        suiEvents.push extractSUIEvents(data)
+        cb(null)
+    ], done
+
+  async.each files, fn, (err) ->
+    if err
+      console.error 'Error analyzing SUI Experiment:', err
+      process.exit()
+
+    acc = {}
+    mean = {}
+    median = {}
+    accurracy = {}
+    sum = {}
+
+    for result in suiEvents
+      for input of result
+        for btnSize of result[input]
+          if btnSize is 'event' or btnSize is 'timestamp' then continue
+          for margin, data of result[input][btnSize]
+            acc[input] ?= {}
+            acc[input][btnSize] ?= {}
+            acc[input][btnSize][margin] ?=
+              correct: []
+              incorrect: []
+
+            if data.incorrect > data.correct + 2
+              data.incorrect = data.correct + 2
+
+            acc[input][btnSize][margin].correct.push data.correct
+            acc[input][btnSize][margin].incorrect.push data.incorrect
+
+            if input is 'k' and btnSize is '31.25' and margin is '20'
+              console.log data.correct, data.incorrect
+
+    for input of acc
+      for btnSize of acc[input]
+        for margin, data of acc[input][btnSize]
+          mean[input] ?= {}
+          mean[input][btnSize] ?= {}
+          mean[input][btnSize][margin] ?=
+            correct: 0
+            incorrect: 0
+
+          median[input] ?= {}
+          median[input][btnSize] ?= {}
+          median[input][btnSize][margin] ?=
+            correct: 0
+            incorrect: 0
+
+          mean[input][btnSize][margin].correct =
+            mathjs.mean acc[input][btnSize][margin].correct
+          median[input][btnSize][margin].correct =
+            mathjs.median acc[input][btnSize][margin].correct
+          mean[input][btnSize][margin].incorrect =
+            mathjs.mean acc[input][btnSize][margin].incorrect
+          median[input][btnSize][margin].incorrect =
+            mathjs.median acc[input][btnSize][margin].incorrect
+
+          sumCorrect = mathjs.sum(acc[input][btnSize][margin].correct)
+          sumIncorrect = mathjs.sum(acc[input][btnSize][margin].incorrect)
+
+          sum[input] ?= {}
+          sum[input][btnSize] ?= {}
+          sum[input][btnSize][margin] =
+            correct: sumCorrect
+            incorrect: sumIncorrect
+
+          accurracy[input] ?= {}
+          accurracy[input][btnSize] ?= {}
+          accurracy[input][btnSize][margin] = sumCorrect / (sumCorrect + sumIncorrect)
+
+
+    for input of acc
+      strInput = mapInputNames(input)
+      console.log "\n\nInput Method: #{strInput}"
+      for btnSize of mean[input]
+        console.log "  Button Size: #{btnSize}"
+        for margin of mean[input][btnSize]
+
+          thisMean = mean[input][btnSize][margin]
+          thisMedian = median[input][btnSize][margin]
+          thisSum = sum[input][btnSize][margin]
+          thisAccuracy = accurracy[input][btnSize][margin]
+
+          console.log "    Margin: #{margin}"
+          console.log "       Mean:      #{thisMean.correct} / #{thisMean.incorrect}"
+          console.log "       Median:    #{thisMedian.correct} / #{thisMedian.incorrect}"
+          console.log "       Sum:       #{thisSum.correct} / #{thisSum.incorrect}"
+          console.log "       Accurracy: #{thisAccuracy}"
 
 
 
@@ -303,7 +449,8 @@ analyzeExperimentTimes = (files, options) ->
 
 
 analyze = (files, options) ->
-  analyzeExperimentTimes files, options
+  #analyzeExperimentTimes files, options
+  analyzeSUIExperiment files, options
 
 
 
@@ -326,6 +473,7 @@ program
   .option('-a, --analyze', 'perform log analysis')
   .option('-i, --info', 'ouput formatted information')
   .option('-D, --display', 'extract and display event information')
+  .option('-S, --sui', 'synthetic ui experiment info')
   .option('-x, --experiment', 'include experiment events')
   .option('-l, --load', 'include load events')
   .option('-L, --unload', 'include unload events')
