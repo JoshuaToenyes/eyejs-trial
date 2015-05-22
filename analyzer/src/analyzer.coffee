@@ -4,7 +4,7 @@ fs      = require 'fs'
 program = require 'commander'
 async   = require 'async'
 moment  = require 'moment'
-glob    = require 'glob'
+mathjs  = require 'mathjs'
 
 
 mapExperimentNames = (e) ->
@@ -251,6 +251,62 @@ extract = (files, options) ->
 
 
 
+analyzeExperimentTimes = (files, options) ->
+  times = []
+
+  fn = (file, done) ->
+    async.waterfall [
+      (cb) ->
+        parseCb = ->
+          cb(null, arguments...)
+        parseLogFile file, parseCb, options
+      (data, filename, options, cb) ->
+        times.push collectExperimentTimes data, filename, options
+        cb(null)
+    ], done
+
+  async.each files, fn, (err) ->
+    if err
+      console.error 'Error analyzing times:', err
+      process.exit()
+
+    acc = {}
+    mean = {}
+    median = {}
+
+    for t in times
+      for exp of t
+        for input, v of t[exp]
+          acc[exp] ?= {}
+          acc[exp][input] ?= []
+          if v.duration < Infinity then acc[exp][input].push v.duration
+
+    for exp of acc
+      for input, duration of acc[exp]
+        mean[exp] ?= {}
+        median[exp] ?= {}
+        mean[exp][input] = Math.round mathjs.mean(acc[exp][input])
+        median[exp][input] = Math.round mathjs.median(acc[exp][input])
+
+    console.log "\n\n---Mean Experiment Durations---"
+
+    for exp of mean
+      for input, duration of mean[exp]
+        console.log mapExperimentNames(exp), mapInputNames(input), duration
+
+    console.log "\n\n---Median Experiment Durations---"
+
+    for exp of median
+      for input, duration of median[exp]
+        console.log mapExperimentNames(exp), mapInputNames(input), duration
+
+
+
+analyze = (files, options) ->
+  analyzeExperimentTimes files, options
+
+
+
 parseArgs = (files..., options) ->
 
   if options.info
@@ -258,6 +314,9 @@ parseArgs = (files..., options) ->
 
   if options.display
     extract files, options
+
+  if options.analyze
+    analyze files, options
 
 
 

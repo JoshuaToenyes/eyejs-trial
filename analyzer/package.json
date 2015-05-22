@@ -8,7 +8,7 @@
     "commander": "*",
     "moment": "2.10.x",
     "async": "*",
-    "glob": "*"
+    "mathjs": "*"
   },
   "devDependencies": {
     "grunt": "0.4.x",
