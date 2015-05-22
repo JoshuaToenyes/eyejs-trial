@@ -5,7 +5,7 @@ program = require 'commander'
 async   = require 'async'
 moment  = require 'moment'
 mathjs  = require 'mathjs'
-plotly  = require 'plotly'
+plotly  = require('plotly')('joshua.toenyes','4u1jcbprmz')
 
 
 mapExperimentNames = (e) ->
@@ -316,7 +316,7 @@ analyzeSUIExperiment = (files, options) ->
     acc = {}
     mean = {}
     median = {}
-    accurracy = {}
+    accuracy = {}
     sum = {}
 
     for result in suiEvents
@@ -372,9 +372,9 @@ analyzeSUIExperiment = (files, options) ->
             correct: sumCorrect
             incorrect: sumIncorrect
 
-          accurracy[input] ?= {}
-          accurracy[input][btnSize] ?= {}
-          accurracy[input][btnSize][margin] = sumCorrect / (sumCorrect + sumIncorrect)
+          accuracy[input] ?= {}
+          accuracy[input][btnSize] ?= {}
+          accuracy[input][btnSize][margin] = sumCorrect / (sumCorrect + sumIncorrect)
 
 
     for input of acc
@@ -387,18 +387,97 @@ analyzeSUIExperiment = (files, options) ->
           thisMean = mean[input][btnSize][margin]
           thisMedian = median[input][btnSize][margin]
           thisSum = sum[input][btnSize][margin]
-          thisAccuracy = accurracy[input][btnSize][margin]
+          thisAccuracy = accuracy[input][btnSize][margin]
 
           console.log "    Margin: #{margin}"
           console.log "       Mean:      #{thisMean.correct} / #{thisMean.incorrect}"
           console.log "       Median:    #{thisMedian.correct} / #{thisMedian.incorrect}"
           console.log "       Sum:       #{thisSum.correct} / #{thisSum.incorrect}"
-          console.log "       Accurracy: #{thisAccuracy}"
+          console.log "       Accuracy: #{thisAccuracy}"
+
+    # Plot the accuracy of each input mode.
+    for input of accuracy
+      traces = {}
+      for btnSize of accuracy[input]
+        if +btnSize < 10 then continue
+        for margin of accuracy[input][btnSize]
+          traces[margin] ?=
+            x: []
+            y: []
+            type: 'scatter'
+            name: "#{Math.round(margin)}px Margin"
+          traces[margin].x.push Math.round(+btnSize)
+          traces[margin].y.push accuracy[input][btnSize][margin]
+
+      data = []
+      for k, trace of traces
+        data.push trace
+
+      inputName = mapInputNames(input)
+      layout =
+        title: "SUI #{inputName} Plot"
+        xaxis:
+          title: 'Button Size (pixels)'
+          showgird: false
+          zeroline: false
+          autorange: 'reversed'
+        yaxis:
+          title: 'Accuracy'
+          rangemode: 'tozero'
+      graphOptions =
+        filename: "SUI-#{inputName}-Plot"
+        fileopt: "overwrite"
+        layout: layout
+      plotly.plot data, graphOptions, (err, msg) ->
+        if err then console.error error
+
+    # Plot all input modes compared to each other... taking the mean accuracy
+    # over the margin size.
+    traces = {}
+    for input of accuracy
+      inputName = mapInputNames(input)
+      traces[input] =
+        x: []
+        y: []
+        type: 'scatter'
+        name: "#{inputName}"
+      for btnSize of accuracy[input]
+        m = []
+        for margin of accuracy[input][btnSize]
+          m.push accuracy[input][btnSize][margin]
+        if btnSize < 10 then continue
+        traces[input].x.push btnSize
+        traces[input].y.push mathjs.mean m
+
+    data = []
+    for k, trace of traces
+      data.push trace
+
+    layout =
+      title: "SUI Input Comparison Plot"
+      xaxis:
+        title: 'Button Size (pixels)'
+        showgird: false
+        zeroline: false
+        autorange: 'reversed'
+      yaxis:
+        title: 'Mean Accuracy Over Margin Size'
+        rangemode: 'tozero'
+    graphOptions =
+      filename: "SUI-Input-Comparison-Plot"
+      fileopt: "overwrite"
+      layout: layout
+    plotly.plot data, graphOptions, (err, msg) ->
+      if err then console.error error
+
+
+
 
 
 
 analyzeExperimentTimes = (files, options) ->
   times = []
+  trialDurations = []
 
   fn = (file, done) ->
     async.waterfall [
@@ -408,6 +487,8 @@ analyzeExperimentTimes = (files, options) ->
         parseLogFile file, parseCb, options
       (data, filename, options, cb) ->
         times.push collectExperimentTimes data, filename, options
+        trialInfo = extractEvent('participant end', data)[0]
+        trialDurations.push(trialInfo.timestamp - trialInfo.trial.start)
         cb(null)
     ], done
 
@@ -434,6 +515,9 @@ analyzeExperimentTimes = (files, options) ->
         mean[exp][input] = Math.round mathjs.mean(acc[exp][input])
         median[exp][input] = Math.round mathjs.median(acc[exp][input])
 
+    console.log "Mean Trial Duration:   ", moment.duration(mathjs.mean(trialDurations)).asMinutes()
+    console.log "Median Trial Duration: ", moment.duration(mathjs.median(trialDurations)).asMinutes()
+
     console.log "\n\n---Mean Experiment Durations---"
 
     for exp of mean
@@ -449,8 +533,11 @@ analyzeExperimentTimes = (files, options) ->
 
 
 analyze = (files, options) ->
-  #analyzeExperimentTimes files, options
-  analyzeSUIExperiment files, options
+  if options.times
+    analyzeExperimentTimes files, options
+
+  if options.sui
+    analyzeSUIExperiment files, options
 
 
 
@@ -474,6 +561,7 @@ program
   .option('-i, --info', 'ouput formatted information')
   .option('-D, --display', 'extract and display event information')
   .option('-S, --sui', 'synthetic ui experiment info')
+  .option('-T, --times', 'experiment time information')
   .option('-x, --experiment', 'include experiment events')
   .option('-l, --load', 'include load events')
   .option('-L, --unload', 'include unload events')
@@ -488,6 +576,7 @@ program
   .option('-C, --count', 'prints the count of the cooresponding events')
   .option('-j, --json', 'print output as JSON')
   .option('-s, --csv', 'print output as CSV')
+  .option('-p, --plot', 'generate plotly plots')
   .action(parseArgs)
 
 program.parse(process.argv)
