@@ -530,6 +530,40 @@ analyzeExperimentTimes = (files, options) ->
       for input, duration of median[exp]
         console.log mapExperimentNames(exp), mapInputNames(input), duration
 
+    traces = {}
+    for exp of mean
+      if exp not in ['a', 's', 'w'] then continue
+      for input, duration of mean[exp]
+        inputName = mapInputNames(input)
+        traces[input] ?=
+          x: []
+          y: []
+          type: 'bar'
+          name: "#{inputName}"
+        traces[input].x.push mapExperimentNames(exp)
+        traces[input].y.push Math.round(moment.duration(duration).asSeconds())
+
+    data = []
+    for k, trace of traces
+      data.push trace
+
+    layout =
+      title: "Experiment Duration vs. Input Mode"
+      barmode: 'group'
+      xaxis:
+        title: 'Experiment'
+        showgird: false
+        zeroline: false
+      yaxis:
+        title: 'Duration (seconds)'
+    graphOptions =
+      filename: "Exp-Duration-vs-Input-Mode"
+      fileopt: "overwrite"
+      layout: layout
+    plotly.plot data, graphOptions, (err, msg) ->
+      if err then console.error error
+      console.log msg
+
 
 
 analyze = (files, options) ->
