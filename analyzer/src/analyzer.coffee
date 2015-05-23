@@ -614,6 +614,8 @@ exportGazeDataset = (files, options) ->
     toKeepEvents = []
 
     for e,i in events
+      if i % 1000 is 0
+        console.log "processing #{i} of #{events.length}..."
       if e.event is 'gaze'
         preceedingMouseEvents = getPreviousMouseEvents events, i, e.timestamp
         if preceedingMouseEvents.length >= N
@@ -623,8 +625,13 @@ exportGazeDataset = (files, options) ->
             q.push [p.screenX, p.screenY]
           toKeepEvents.push q
 
+    # Shuffle contents for statistically randomized data.
+    toKeepEvents = _.shuffle(toKeepEvents)
+
     contents = ''
-    for e in toKeepEvents
+    for e,i in toKeepEvents
+      if i % 100 is 0
+        console.log "converting #{i} of #{toKeepEvents.length} to json..."
       contents += JSON.stringify(e) + '\n'
 
     fs.writeFile 'gaze-dataset.json', contents, {encoding: 'utf-8'}, (err) ->
