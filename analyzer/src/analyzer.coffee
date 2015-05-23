@@ -566,6 +566,75 @@ analyzeExperimentTimes = (files, options) ->
 
 
 
+
+exportGazeDataset = (files, options) ->
+  events = []
+
+  # N = number of mouse events to get for each gaze...
+  # T = within maximum number of milliseconds
+  [N, T] = options.gazeDataset.split ','
+
+  options.gaze = true
+  options.mouseMove = true
+
+  getPreviousMouseEvents = (data, i, timestamp) ->
+    es = []
+    loop
+      i--
+      if i <= 0 then break
+      datum = data[i]
+      if datum.event is 'gaze' then continue
+      if timestamp - datum.timestamp > T then break
+      if es.length >= N then break
+      es.push datum
+    es
+
+  fn = (file, done) ->
+    async.waterfall [
+      (cb) ->
+        parseCb = ->
+          cb(null, arguments...)
+        parseLogFile file, parseCb, options
+      (data, filename, options, cb) ->
+        events = events.concat extractEvents(data, options)
+        cb(null)
+    ], done
+
+  async.each files, fn, (err) ->
+    if err
+      console.error error
+      process.exit 1
+
+    console.log 'sorting data...'
+
+    events = _.sortBy events, ((e) -> e.timestamp)
+
+    console.log 'building contents...'
+
+    toKeepEvents = []
+
+    for e,i in events
+      if e.event is 'gaze'
+        preceedingMouseEvents = getPreviousMouseEvents events, i, e.timestamp
+        if preceedingMouseEvents.length >= N
+          q = []
+          q.push [Math.round(e.rawx), Math.round(e.rawy)]
+          for p in preceedingMouseEvents
+            q.push [p.screenX, p.screenY]
+          toKeepEvents.push q
+
+    contents = ''
+    for e in toKeepEvents
+      contents += JSON.stringify(e) + '\n'
+
+    fs.writeFile 'gaze-dataset.json', contents, {encoding: 'utf-8'}, (err) ->
+      if err
+        console.error "Error writing file: ", err
+
+
+
+
+
 analyze = (files, options) ->
   if options.times
     analyzeExperimentTimes files, options
@@ -585,6 +654,9 @@ parseArgs = (files..., options) ->
 
   if options.analyze
     analyze files, options
+
+  if options.gazeDataset
+    exportGazeDataset files, options
 
 
 
@@ -611,6 +683,7 @@ program
   .option('-j, --json', 'print output as JSON')
   .option('-s, --csv', 'print output as CSV')
   .option('-p, --plot', 'generate plotly plots')
+  .option('-G, --gaze-dataset [N,T]', 'export gaze dataset')
   .action(parseArgs)
 
 program.parse(process.argv)
