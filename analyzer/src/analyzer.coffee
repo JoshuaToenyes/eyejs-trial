@@ -296,6 +296,7 @@ extract = (files, options) ->
 
 analyzeSUIExperiment = (files, options) ->
   suiEvents = []
+  times = []
 
   fn = (file, done) ->
     async.waterfall [
@@ -305,6 +306,7 @@ analyzeSUIExperiment = (files, options) ->
         parseLogFile file, parseCb, options
       (data, filename, options, cb) ->
         suiEvents.push extractSUIEvents(data)
+        times.push collectExperimentTimes data, filename, options
         cb(null)
     ], done
 
@@ -319,7 +321,17 @@ analyzeSUIExperiment = (files, options) ->
     accuracy = {}
     sum = {}
 
-    for result in suiEvents
+    userMeanEyeAccuracy = []
+    userKeypressEyeAccuracy = []
+    userBlinkAccuracy = []
+    userMouseAccuracy = []
+
+    for result, i in suiEvents
+      userEyeAcc = {correct: 0, incorrect: 0}
+      userKAcc   = {correct: 0, incorrect: 0}
+      userBAcc   = {correct: 0, incorrect: 0}
+      userMAcc   = {correct: 0, incorrect: 0}
+
       for input of result
         for btnSize of result[input]
           if btnSize is 'event' or btnSize is 'timestamp' then continue
@@ -330,17 +342,46 @@ analyzeSUIExperiment = (files, options) ->
               correct: []
               incorrect: []
 
+            # This is correcting for an error in the recorded data. Many-more
+            # incorrect results were recorded than allowed.
             if data.incorrect > data.correct + 2
               data.incorrect = data.correct + 2
 
             acc[input][btnSize][margin].correct.push data.correct
             acc[input][btnSize][margin].incorrect.push data.incorrect
 
-            if input is 'k' and btnSize is '31.25' and margin is '20'
-              console.log data.correct, data.incorrect
+            # Added correct/incorrect counts for only eye-input modes.
+            if input isnt 'k'
+              userEyeAcc.correct += data.correct
+              userEyeAcc.incorrect += data.incorrect
+
+            switch input
+              when 'k'
+                userKAcc.correct += data.correct
+                userKAcc.incorrect += data.incorrect
+              when 'b'
+                userBAcc.correct += data.correct
+                userBAcc.incorrect += data.incorrect
+              when 'm'
+                userMAcc.correct += data.correct
+                userMAcc.incorrect += data.incorrect
+
+      # Calculate the mean eye-input mode accuracy.
+      userMeanEyeAccuracy.push(
+        userEyeAcc.correct / (userEyeAcc.incorrect + userEyeAcc.correct))
+
+      userKeypressEyeAccuracy.push(
+        userKAcc.correct / (userKAcc.incorrect + userKAcc.correct))
+
+      userBlinkAccuracy.push(
+        userBAcc.correct / (userBAcc.incorrect + userBAcc.correct))
+
+      userMouseAccuracy.push(
+        userMAcc.correct / (userMAcc.incorrect + userMAcc.correct))
 
     for input of acc
       for btnSize of acc[input]
+        if +btnSize < 10 then continue
         for margin, data of acc[input][btnSize]
           mean[input] ?= {}
           mean[input][btnSize] ?= {}
@@ -469,6 +510,62 @@ analyzeSUIExperiment = (files, options) ->
       layout: layout
     plotly.plot data, graphOptions, (err, msg) ->
       if err then console.error error
+
+    # Plot the accuracy with respect to time. (i.e. we are interesting in
+    # determining if accuracy increases with the amount of time the user takes
+    # to complete the experiment.) This will be a scatter-plot, with eye-input
+    # task duration (sum of button and blink) as the x axis and accuracy as the
+    # y-axis.
+    for inputMode, m in [
+      userMeanEyeAccuracy,
+      userKeypressEyeAccuracy,
+      userBlinkAccuracy
+      userMouseAccuracy]
+      data =
+        x: []
+        y: []
+        type: 'scatter'
+        mode: 'markers'
+      for meanAccuracy, i in userMeanEyeAccuracy
+        time = times[i]
+        switch m
+          when 0
+            title = 'SUI Accuracy vs. Mean Eye Task Duration'
+            filename = 'SUI-Accuracy-vs-Time-Mean-Eye'
+            taskDuration = time.s.b.duration + time.s.k.duration
+          when 1
+            title = 'SUI Accuracy vs. Eye Keypress Task Duration'
+            filename = 'SUI-Accuracy-vs-Time-Keypress'
+            taskDuration = time.s.k.duration
+          when 2
+            title = 'SUI Accuracy vs. Eye Blink Task Duration'
+            filename = 'SUI-Accuracy-vs-Time-Blink'
+            taskDuration = time.s.b.duration
+          when 3
+            title = 'SUI Accuracy vs. Mouse Task Duration'
+            filename = 'SUI-Accuracy-vs-Time-Mouse'
+            taskDuration = time.s.m.duration
+
+        data.x.push moment.duration(taskDuration).asSeconds()
+        data.y.push meanAccuracy
+
+      layout =
+        title: title
+        xaxis:
+          title: 'Task Duration (seconds)'
+          showgird: false
+          zeroline: false
+        yaxis:
+          title: 'Accuracy'
+          rangemode: 'tozero'
+      graphOptions =
+        filename: filename
+        fileopt: "overwrite"
+        layout: layout
+      plotly.plot data, graphOptions, (err, msg) ->
+        if err then console.error error
+
+
 
 
 
